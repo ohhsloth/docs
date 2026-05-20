@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import React from "react";
 
 const NAV = [
   { id: "overview",     label: "Overview",        group: "Introduction" },
@@ -12,29 +13,31 @@ const NAV = [
   { id: "setup",        label: "Local Setup",      group: "Reference" },
 ];
 
+type NavId = "overview" | "how-it-works" | "architecture" | "tech-stack" | "api" | "cli" | "training" | "versioning" | "setup";
+
 /* ── primitives ─────────────────────────────────────── */
 
-const H1 = ({ children }) => (
+const H1 = ({ children }: { children: React.ReactNode }) => (
   <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 36, fontWeight: 400, letterSpacing: "-0.02em", color: "#0d0d0d", marginBottom: 8, lineHeight: 1.15 }}>
     {children}
   </h1>
 );
 
-const H2 = ({ children }) => (
+const H2 = ({ children }: { children: React.ReactNode }) => (
   <h2 style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", marginTop: 40, marginBottom: 14, borderTop: "1px solid #f0f0f0", paddingTop: 16 }}>
     {children}
   </h2>
 );
 
-const P = ({ children }) => (
+const P = ({ children }: { children: React.ReactNode }) => (
   <p style={{ fontSize: 14.5, lineHeight: 1.8, color: "#555", marginBottom: 16, fontFamily: "'DM Sans', sans-serif" }}>{children}</p>
 );
 
-const Code = ({ children }) => (
+const Code = ({ children }: { children: React.ReactNode }) => (
   <code style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, background: "#f4f4f2", padding: "2px 6px", borderRadius: 4, color: "#333" }}>{children}</code>
 );
 
-const Block = ({ children, label }) => (
+const Block = ({ children, label }: { children: React.ReactNode; label?: string }) => (
   <div style={{ margin: "16px 0" }}>
     {label && <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.1em", color: "#bbb", textTransform: "uppercase", marginBottom: 6 }}>{label}</div>}
     <pre style={{ background: "#0d0d0d", color: "#e8e4d9", fontFamily: "'DM Mono', monospace", fontSize: 12.5, lineHeight: 1.7, borderRadius: 10, padding: "18px 22px", overflowX: "auto", whiteSpace: "pre-wrap", margin: 0 }}>
@@ -43,7 +46,7 @@ const Block = ({ children, label }) => (
   </div>
 );
 
-const Tag = ({ color = "#f4f4f2", text = "#666", children }) => (
+const Tag = ({ color = "#f4f4f2", text = "#666", children }: { color?: string; text?: string; children: React.ReactNode }) => (
   <span style={{ display: "inline-block", fontSize: 11, fontWeight: 500, fontFamily: "'DM Mono', monospace", padding: "2px 8px", borderRadius: 99, background: color, color: text, marginRight: 6, marginTop: 4 }}>
     {children}
   </span>
@@ -51,7 +54,7 @@ const Tag = ({ color = "#f4f4f2", text = "#666", children }) => (
 
 const Divider = () => <hr style={{ border: "none", borderTop: "1px solid #f0f0f0", margin: "32px 0" }} />;
 
-const Card = ({ title, desc, tag, tagColor = "#f4f4f2", tagText = "#666" }) => (
+const Card = ({ title, desc, tag, tagColor = "#f4f4f2", tagText = "#666" }: { title: string; desc: string; tag?: string; tagColor?: string; tagText?: string }) => (
   <div style={{ border: "1px solid #ebebeb", borderRadius: 10, padding: "16px 18px", marginBottom: 10, background: "#fff" }}>
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
       <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: "#0d0d0d" }}>{title}</span>
@@ -61,7 +64,7 @@ const Card = ({ title, desc, tag, tagColor = "#f4f4f2", tagText = "#666" }) => (
   </div>
 );
 
-const Step = ({ num, title, body, code, codeLabel }) => (
+const Step = ({ num, title, body, code, codeLabel }: { num: string; title: string; body: string; code?: string; codeLabel?: string }) => (
   <div style={{ marginBottom: 32, paddingLeft: 0 }}>
     <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 8 }}>
       <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#ccc", letterSpacing: "0.05em" }}>{num}</span>
@@ -336,14 +339,17 @@ const ApiPage = () => (
       },
       {
         method: "GET", path: "/api/tags", desc: "List all installed OhhSloth models.",
+        req: undefined,
         res: `{"models": [{"name": "ohhsloth-120m", "size": "70 MB", "format": "GGUF"}]}`,
       },
       {
         method: "GET", path: "/v1/models", desc: "OpenAI-compatible model list.",
+        req: undefined,
         res: `{"data": [{"id": "ohhsloth-120m", "object": "model", "owned_by": "ohhsloth"}]}`,
       },
       {
         method: "GET", path: "/health", desc: "Check server status and loaded model.",
+        req: undefined,
         res: `{"status": "ok", "model_loaded": "ohhsloth-120m", "device": "cuda"}`,
       },
     ].map(({ method, path, desc, req, res }) => (
@@ -443,7 +449,7 @@ SAVE = "/content/drive/MyDrive/ohhsloth"
   --resume /content/drive/MyDrive/ohhsloth/checkpoints/ohhsloth-step-5000.pt`}</Block>
 
     <H2>Reading the training logs</H2>
-    <Block>{`step   100 | loss 3.84 | lr 3.00e-04 | 1240 tok/s
+    <Block label="output">{`step   100 | loss 3.84 | lr 3.00e-04 | 1240 tok/s
 step   500 | loss 2.93 | lr 2.88e-04 | 1198 tok/s
 step  1000 | loss 2.41 | lr 2.61e-04 | 1205 tok/s
 VAL LOSS: 2.39  ← saved best checkpoint → HuggingFace`}</Block>
@@ -467,6 +473,7 @@ data/v4/  ← + instruction pairs (chat format)`}</Block>
     <H2>Adding new data — exact steps</H2>
     <Step num="01" title="Add your text file"
       body="Put any .txt or .jsonl file in data/raw/. Can be your own notes, articles, domain-specific content — anything."
+      codeLabel="folder"
       code={`data/raw/my_domain_notes.txt   ← your new file`} />
     <Step num="02" title="Run the pipeline"
       body="Cleans, deduplicates, and merges with existing data. Creates a new versioned output."
@@ -570,7 +577,7 @@ OHHSLOTH_MODELS_DIR=~/.ohhsloth/models`}</Block>
   </div>
 );
 
-const PAGES = {
+const PAGES: Record<NavId, React.ComponentType> = {
   overview:       OverviewPage,
   "how-it-works": HowItWorksPage,
   architecture:   ArchitecturePage,
@@ -585,7 +592,7 @@ const PAGES = {
 /* ── shell ──────────────────────────────────────────── */
 
 export default function Docs() {
-  const [current, setCurrent] = useState("overview");
+  const [current, setCurrent] = useState<NavId>("overview");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -598,7 +605,7 @@ export default function Docs() {
   const PageComponent = PAGES[current];
   const groups = [...new Set(NAV.map(n => n.group))];
 
-  const go = (id) => { setCurrent(id); setMenuOpen(false); window.scrollTo(0, 0); };
+  const go = (id: NavId) => { setCurrent(id); setMenuOpen(false); window.scrollTo(0, 0); };
 
   return (
     <>
@@ -640,7 +647,7 @@ export default function Docs() {
               <ul style={{ listStyle: "none" }}>
                 {NAV.filter(n => n.group === group).map(item => (
                   <li key={item.id}>
-                    <button onClick={() => go(item.id)} style={{ width: "100%", textAlign: "left", padding: "6px 10px", borderRadius: 6, fontSize: 13.5, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", border: "none", background: current === item.id ? "#f4f4f2" : "transparent", color: current === item.id ? "#0d0d0d" : "#888", fontWeight: current === item.id ? 500 : 400, transition: "all .12s" }}>
+                    <button onClick={() => go(item.id as NavId)} style={{ width: "100%", textAlign: "left", padding: "6px 10px", borderRadius: 6, fontSize: 13.5, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", border: "none", background: current === item.id ? "#f4f4f2" : "transparent", color: current === item.id ? "#0d0d0d" : "#888", fontWeight: current === item.id ? 500 : 400, transition: "all .12s" }}>
                       {item.label}
                     </button>
                   </li>
@@ -663,13 +670,13 @@ export default function Docs() {
               return (
                 <>
                   {prev ? (
-                    <button onClick={() => go(prev.id)} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                    <button onClick={() => go(prev.id as NavId)} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
                       <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#bbb", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Previous</div>
                       <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13.5, color: "#888" }}>← {prev.label}</div>
                     </button>
                   ) : <div />}
                   {next ? (
-                    <button onClick={() => go(next.id)} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "right" }}>
+                    <button onClick={() => go(next.id as NavId)} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "right" }}>
                       <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#bbb", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Next</div>
                       <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13.5, color: "#888" }}>{next.label} →</div>
                     </button>

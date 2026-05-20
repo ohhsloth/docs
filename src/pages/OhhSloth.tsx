@@ -8,4 +8,4 @@ const OhhSloth: React.FC = () => {
   )
 }
 
-export default Sheep
+export default OhhSloth
