@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sheep from './pages/Sheep';
+import OhhSloth from './pages/OhhSloth';
 import Docs from './pages/Docs';
 
 const App: React.FC = () => {
@@ -8,7 +8,7 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/docs" element={<Docs />} />
-        <Route path="/" element={<Sheep/>} />
+        <Route path="/" element={<OhhSloth/>} />
       </Routes>
     </Router>
   );

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Sheep: React.FC = () => {
+const OhhSloth: React.FC = () => {
   return (
     <>
     sheep

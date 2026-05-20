@@ -76,28 +76,28 @@ const Step = ({ num, title, body, code, codeLabel }) => (
 
 const OverviewPage = () => (
   <div>
-    <H1>Sheep LLM 🐑</H1>
+    <H1>OhhSloth 🦥</H1>
     <p style={{ fontSize: 15, color: "#999", marginBottom: 32, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
       Your own large language model — built from scratch, trained on your data, runs on your machine.
     </p>
     <P>
-      Sheep is a fully custom LLM stack. From raw text data to a running model you can chat with — every single layer is built by you. No black boxes. No API bills. Just your own AI with your own name.
+      OhhSloth is a fully custom LLM stack. From raw text data to a running model you can chat with — every single layer is built by you. No black boxes. No API bills. Just your own AI with your own name.
     </P>
     <P>
-      Inspired by Ollama, Sheep lets you run your trained model locally with one command: <Code>sheep run sheep-120m</Code>. The difference is every part of the stack is yours.
+      Inspired by Ollama, OhhSloth lets you run your trained model locally with one command: <Code>ohhsloth run ohhsloth-120m</Code>. The difference is every part of the stack is yours.
     </P>
 
     <Divider />
-    <H2>What Sheep gives you</H2>
+    <H2>What OhhSloth gives you</H2>
 
     <Card title="Your own trained model" tag="Core" tagColor="#e8f5e9" tagText="#2e7d32"
       desc="Train a GPT-style transformer on your own corpus. Start at 10M params, scale to 1B." />
     <Card title="Your own tokenizer" tag="Core" tagColor="#e8f5e9" tagText="#2e7d32"
       desc="BPE tokenizer trained on your data. Your vocabulary, your special tokens." />
     <Card title="Ollama-style runner" tag="Tooling" tagColor="#e3f2fd" tagText="#1565c0"
-      desc="sheep run · sheep pull · sheep serve — same UX as Ollama but it's yours." />
+      desc="ohhsloth run · ohhsloth pull · ohhsloth serve — same UX as Ollama but it's yours." />
     <Card title="OpenAI-compatible API" tag="Tooling" tagColor="#e3f2fd" tagText="#1565c0"
-      desc="POST /v1/chat/completions — any app built for ChatGPT works with Sheep instantly." />
+      desc="POST /v1/chat/completions — any app built for ChatGPT works with OhhSloth instantly." />
     <Card title="Full MLOps pipeline" tag="Production" tagColor="#fce4ec" tagText="#880e4f"
       desc="Docker, Prometheus, MLflow, GitHub Actions CI — production-grade from day one." />
 
@@ -105,9 +105,9 @@ const OverviewPage = () => (
     <H2>Model sizes</H2>
     <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12.5, border: "1px solid #ebebeb", borderRadius: 10, overflow: "hidden" }}>
       {[
-        ["sheep-tiny",  "10M",  "~40 MB",  "CPU",        "Test everything works"],
-        ["sheep-120m",  "120M", "~70 MB",  "Colab T4",   "First real model"],
-        ["sheep-1b",    "1B",   "~600 MB", "Colab A100", "Production quality"],
+        ["ohhsloth-tiny",  "10M",  "~40 MB",  "CPU",        "Test everything works"],
+        ["ohhsloth-120m",  "120M", "~70 MB",  "Colab T4",   "First real model"],
+        ["ohhsloth-1b",    "1B",   "~600 MB", "Colab A100", "Production quality"],
       ].map(([name, params, size, hw, use], i) => (
         <div key={name} style={{ display: "grid", gridTemplateColumns: "1.4fr 0.7fr 0.8fr 1fr 1.5fr", gap: 0, padding: "10px 16px", background: i % 2 === 0 ? "#fff" : "#fafafa", borderBottom: i < 2 ? "1px solid #f0f0f0" : "none", alignItems: "center" }}>
           <span style={{ color: "#0d0d0d", fontWeight: 500 }}>{name}</span>
@@ -136,19 +136,19 @@ const HowItWorksPage = () => (
   --custom_file my_notes.txt \\
   --max_samples 100000`} />
 
-    <Step num="02" title="Train the Sheep tokenizer"
-      body="Train a BPE tokenizer on your corpus. It converts words into numbers. Your vocabulary, your special tokens like <sheep> and <|user|>."
+    <Step num="02" title="Train the OhhSloth tokenizer"
+      body="Train a BPE tokenizer on your corpus. It converts words into numbers. Your vocabulary, your special tokens like <ohhsloth> and <|user|>."
       codeLabel="tokenizer/train_tokenizer.py"
       code={`python tokenizer/train_tokenizer.py \\
   --data data/cleaned/train.jsonl \\
   --vocab_size 32000
-# → saves tokenizer/sheep-tokenizer/`} />
+# → saves tokenizer/ohhsloth-tokenizer/`} />
 
     <Step num="03" title="Build the transformer brain"
       body="Write the model architecture in VS Code. RoPE embeddings, grouped query attention, SwiGLU FFN, RMSNorm — same building blocks as LLaMA 3."
-      codeLabel="model/sheep_model.py"
-      code={`python model/sheep_model.py
-# SheepLLM(
+      codeLabel="model/ohhsloth_model.py"
+      code={`python model/ohhsloth_model.py
+# OhhSlothLLM(
 #   layers    = 4
 #   embed_dim = 256
 #   params    = 10.4M
@@ -159,7 +159,7 @@ const HowItWorksPage = () => (
       body="Run the training loop on Colab's free GPU. Loss goes from ~4.0 down to ~1.8. Checkpoints auto-save to Google Drive every N steps."
       codeLabel="training/train.py"
       code={`python training/train.py \\
-  --config configs/sheep_tiny.yaml
+  --config configs/ohhsloth_tiny.yaml
 # step   100 | loss 3.8412 | lr 3.00e-04
 # step   500 | loss 2.9341 | lr 2.88e-04
 # step  1000 | loss 2.4120 | lr 2.61e-04
@@ -170,20 +170,20 @@ const HowItWorksPage = () => (
       codeLabel="inference/convert_gguf.py"
       code={`# In Colab after training
 python inference/convert_gguf.py \\
-  --input checkpoints/sheep-best.pt \\
-  --output sheep-120m.gguf
+  --input checkpoints/ohhsloth-best.pt \\
+  --output ohhsloth-120m.gguf
 # Q4 quantize: 280MB → 70MB ✓
-# Push to HuggingFace: yourname/sheep-120m ✓`} />
+# Push to HuggingFace: yourname/ohhsloth-120m ✓`} />
 
     <Step num="06" title="Run it locally"
-      body="Install the Sheep CLI, start the server, and chat with your own model. OpenAI-compatible so any existing app works instantly."
+      body="Install the OhhSloth CLI, start the server, and chat with your own model. OpenAI-compatible so any existing app works instantly."
       codeLabel="terminal"
       code={`pip install -e .
-sheep serve &          # start server on :11435
-sheep run sheep-120m   # open chat
+ohhsloth serve &             # start server on :11435
+ohhsloth run ohhsloth-120m   # open chat
 
-You   : What is machine learning?
-Sheep : Machine learning is a branch of...`} />
+You      : What is machine learning?
+OhhSloth : Machine learning is a branch of...`} />
   </div>
 );
 
@@ -191,15 +191,15 @@ const ArchitecturePage = () => (
   <div>
     <H1>Architecture</H1>
     <p style={{ fontSize: 15, color: "#999", marginBottom: 32, fontFamily: "'DM Sans', sans-serif" }}>
-      Every layer of the Sheep stack explained.
+      Every layer of the OhhSloth stack explained.
     </p>
 
     <H2>Model internals</H2>
-    <P>Sheep uses a modern GPT-style decoder-only transformer with the same building blocks as LLaMA 3 and Mistral.</P>
+    <P>OhhSloth uses a modern GPT-style decoder-only transformer with the same building blocks as LLaMA 3 and Mistral.</P>
 
     {[
       { name: "RoPE embeddings", desc: "Rotary Position Embeddings — better than learned absolute positions for long contexts. Naturally generalises beyond training length." },
-      { name: "Grouped Query Attention", desc: "GQA reduces KV cache memory by sharing key/value heads across query groups. Sheep-120m uses 12 query heads with 4 KV heads." },
+      { name: "Grouped Query Attention", desc: "GQA reduces KV cache memory by sharing key/value heads across query groups. OhhSloth-120m uses 12 query heads with 4 KV heads." },
       { name: "SwiGLU FFN", desc: "Gated feed-forward: swish(xW1) × (xW3) → xW2. Outperforms standard GELU on most benchmarks with similar compute." },
       { name: "RMSNorm (pre-norm)", desc: "Applied before attention and FFN, not after. More stable training than post-norm LayerNorm." },
       { name: "Weight tying", desc: "The embedding matrix and the LM head share weights, saving millions of parameters for free." },
@@ -212,7 +212,7 @@ const ArchitecturePage = () => (
   → BPE tokenize (words → token IDs)
   → .bin shards (uint16, memory-mapped)
   → DataLoader (streaming, never loads all at once)
-  → SheepLLM forward pass (predict next token)
+  → OhhSlothLLM forward pass (predict next token)
   → cross-entropy loss
   → AdamW + cosine LR
   → checkpoint (.pt) → Google Drive
@@ -221,7 +221,7 @@ const ArchitecturePage = () => (
   → quantize Q4_K_M
   → llama-cpp-python inference
   → FastAPI streaming SSE
-  → sheep CLI / web UI`}</Block>
+  → ohhsloth CLI / web UI`}</Block>
 
     <H2>Folder responsibility</H2>
     <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
@@ -233,7 +233,7 @@ const ArchitecturePage = () => (
         ["finetune/",   "SFT, LoRA, DPO fine-tuning",           "Colab"],
         ["inference/",  "GGUF convert + quantize",               "Colab"],
         ["server/",     "FastAPI OpenAI-compatible server",      "VS Code"],
-        ["cli/",        "sheep CLI tool",                        "VS Code"],
+        ["cli/",        "ohhsloth CLI tool",                     "VS Code"],
         ["configs/",    "YAML model + training configs",         "VS Code"],
         ["mlops/",      "Docker, monitoring, CI/CD",             "VS Code"],
       ].map(([folder, desc, where], i) => (
@@ -251,7 +251,7 @@ const TechStackPage = () => (
   <div>
     <H1>Tech Stack</H1>
     <p style={{ fontSize: 15, color: "#999", marginBottom: 32, fontFamily: "'DM Sans', sans-serif" }}>
-      Everything Sheep is built with.
+      Everything OhhSloth is built with.
     </p>
 
     {[
@@ -279,9 +279,9 @@ const TechStackPage = () => (
         group: "Inference & Serving",
         items: [
           ["llama-cpp-python", "Loads GGUF models and runs fast CPU/GPU inference."],
-          ["FastAPI", "The async web framework powering the Sheep API server."],
+          ["FastAPI", "The async web framework powering the OhhSloth API server."],
           ["SSE / streaming", "Token-by-token streaming responses via Server-Sent Events."],
-          ["Typer + Rich", "The sheep CLI — beautiful terminal output with progress bars."],
+          ["Typer + Rich", "The ohhsloth CLI — beautiful terminal output with progress bars."],
         ],
       },
       {
@@ -289,7 +289,7 @@ const TechStackPage = () => (
         items: [
           ["WandB", "Live loss curves, GPU stats, and experiment comparison."],
           ["MLflow", "Experiment tracking and model registry."],
-          ["Docker", "Containerise the entire Sheep server for any deployment."],
+          ["Docker", "Containerise the entire OhhSloth server for any deployment."],
           ["Prometheus + Grafana", "Track tokens/sec, latency, and GPU usage in production."],
           ["GitHub Actions", "CI/CD — auto-test on every push to main."],
         ],
@@ -297,7 +297,7 @@ const TechStackPage = () => (
       {
         group: "Training Infrastructure",
         items: [
-          ["Google Colab", "Free T4 / A100 GPU for training. Free tier is enough for sheep-tiny."],
+          ["Google Colab", "Free T4 / A100 GPU for training. Free tier is enough for ohhsloth-tiny."],
           ["Kaggle Notebooks", "Backup GPU source — 30 hrs/week free, often faster than Colab."],
           ["Google Drive", "Checkpoint storage during training so sessions never lose progress."],
         ],
@@ -320,31 +320,31 @@ const ApiPage = () => (
   <div>
     <H1>API Endpoints</H1>
     <p style={{ fontSize: 15, color: "#999", marginBottom: 32, fontFamily: "'DM Sans', sans-serif" }}>
-      Sheep runs a local server on <Code>http://localhost:11435</Code>. All endpoints are OpenAI-compatible.
+      OhhSloth runs a local server on <Code>http://localhost:11435</Code>. All endpoints are OpenAI-compatible.
     </p>
 
     {[
       {
         method: "POST", path: "/api/generate", desc: "Ollama-compatible generate endpoint. Send a prompt, get a completion.",
-        req: `{"model": "sheep-120m", "prompt": "The meaning of life is", "max_tokens": 200, "temperature": 0.8, "stream": true}`,
-        res: `{"model": "sheep-120m", "response": "...", "done": true}`,
+        req: `{"model": "ohhsloth-120m", "prompt": "The meaning of life is", "max_tokens": 200, "temperature": 0.8, "stream": true}`,
+        res: `{"model": "ohhsloth-120m", "response": "...", "done": true}`,
       },
       {
         method: "POST", path: "/v1/chat/completions", desc: "OpenAI-compatible chat endpoint. Any app built for ChatGPT works here.",
-        req: `{"model": "sheep-120m", "messages": [{"role": "user", "content": "Hello!"}], "stream": true}`,
-        res: `{"choices": [{"message": {"role": "assistant", "content": "Hi! I'm Sheep..."}}]}`,
+        req: `{"model": "ohhsloth-120m", "messages": [{"role": "user", "content": "Hello!"}], "stream": true}`,
+        res: `{"choices": [{"message": {"role": "assistant", "content": "Hi! I'm OhhSloth..."}}]}`,
       },
       {
-        method: "GET", path: "/api/tags", desc: "List all installed Sheep models.",
-        res: `{"models": [{"name": "sheep-120m", "size": "70 MB", "format": "GGUF"}]}`,
+        method: "GET", path: "/api/tags", desc: "List all installed OhhSloth models.",
+        res: `{"models": [{"name": "ohhsloth-120m", "size": "70 MB", "format": "GGUF"}]}`,
       },
       {
         method: "GET", path: "/v1/models", desc: "OpenAI-compatible model list.",
-        res: `{"data": [{"id": "sheep-120m", "object": "model", "owned_by": "sheep"}]}`,
+        res: `{"data": [{"id": "ohhsloth-120m", "object": "model", "owned_by": "ohhsloth"}]}`,
       },
       {
         method: "GET", path: "/health", desc: "Check server status and loaded model.",
-        res: `{"status": "ok", "model_loaded": "sheep-120m", "device": "cuda"}`,
+        res: `{"status": "ok", "model_loaded": "ohhsloth-120m", "device": "cuda"}`,
       },
     ].map(({ method, path, desc, req, res }) => (
       <div key={path} style={{ marginBottom: 28, border: "1px solid #ebebeb", borderRadius: 10, overflow: "hidden" }}>
@@ -361,9 +361,9 @@ const ApiPage = () => (
     ))}
 
     <H2>Start the server</H2>
-    <Block label="terminal">{`python server/app.py --model sheep-120m --port 11435
+    <Block label="terminal">{`python server/app.py --model ohhsloth-120m --port 11435
 # or with the CLI:
-sheep serve --model sheep-120m`}</Block>
+ohhsloth serve --model ohhsloth-120m`}</Block>
   </div>
 );
 
@@ -375,12 +375,12 @@ const CliPage = () => (
     </p>
 
     {[
-      { cmd: "sheep run <model>",   desc: "Start an interactive chat session with a model.", example: "sheep run sheep-120m\nsheep run sheep-120m --temp 0.5 --max-tokens 500" },
-      { cmd: "sheep serve",         desc: "Start the Sheep API server (FastAPI + llama-cpp-python).", example: "sheep serve\nsheep serve --model sheep-120m --port 11435" },
-      { cmd: "sheep pull <model>",  desc: "Download a model from HuggingFace Hub.", example: "sheep pull yourname/sheep-120m" },
-      { cmd: "sheep list",          desc: "List all models installed in ~/.sheep/models/.", example: "sheep list\n# Name         Size    Format\n# sheep-120m   70 MB   GGUF" },
-      { cmd: "sheep info",          desc: "Show server status, loaded model, and device info.", example: "sheep info" },
-      { cmd: "sheep convert <path>", desc: "Convert a PyTorch checkpoint to GGUF format.", example: "sheep convert checkpoints/sheep-best.pt" },
+      { cmd: "ohhsloth run <model>",    desc: "Start an interactive chat session with a model.", example: "ohhsloth run ohhsloth-120m\nohhsloth run ohhsloth-120m --temp 0.5 --max-tokens 500" },
+      { cmd: "ohhsloth serve",          desc: "Start the OhhSloth API server (FastAPI + llama-cpp-python).", example: "ohhsloth serve\nohhsloth serve --model ohhsloth-120m --port 11435" },
+      { cmd: "ohhsloth pull <model>",   desc: "Download a model from HuggingFace Hub.", example: "ohhsloth pull yourname/ohhsloth-120m" },
+      { cmd: "ohhsloth list",           desc: "List all models installed in ~/.ohhsloth/models/.", example: "ohhsloth list\n# Name            Size    Format\n# ohhsloth-120m   70 MB   GGUF" },
+      { cmd: "ohhsloth info",           desc: "Show server status, loaded model, and device info.", example: "ohhsloth info" },
+      { cmd: "ohhsloth convert <path>", desc: "Convert a PyTorch checkpoint to GGUF format.", example: "ohhsloth convert checkpoints/ohhsloth-best.pt" },
     ].map(({ cmd, desc, example }) => (
       <div key={cmd} style={{ marginBottom: 24 }}>
         <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13.5, color: "#0d0d0d", background: "#f4f4f2", padding: "8px 14px", borderRadius: "8px 8px 0 0", borderBottom: "1px solid #e8e8e6" }}>$ {cmd}</div>
@@ -397,14 +397,14 @@ const TrainingPage = () => (
   <div>
     <H1>Training Guide</H1>
     <p style={{ fontSize: 15, color: "#999", marginBottom: 32, fontFamily: "'DM Sans', sans-serif" }}>
-      Everything you need to train Sheep in Google Colab.
+      Everything you need to train OhhSloth in Google Colab.
     </p>
 
     <H2>Hardware requirements</H2>
     {[
-      ["sheep-tiny (10M)",  "CPU only",       "Your laptop",      "Test + verify"],
-      ["sheep-120m",        "Colab T4 (free)", "~3-6 hours",      "First real run"],
-      ["sheep-1b",          "Colab A100",     "~12-24 hours",     "Production model"],
+      ["ohhsloth-tiny (10M)",  "CPU only",        "Your laptop",      "Test + verify"],
+      ["ohhsloth-120m",        "Colab T4 (free)", "~3-6 hours",       "First real run"],
+      ["ohhsloth-1b",          "Colab A100",      "~12-24 hours",     "Production model"],
     ].map(([model, hw, time, use]) => (
       <div key={model} style={{ display: "grid", gridTemplateColumns: "1.3fr 1.3fr 1fr 1fr", padding: "9px 14px", fontFamily: "'DM Mono', monospace", fontSize: 12, borderBottom: "1px solid #f0f0f0" }}>
         <span style={{ color: "#0d0d0d" }}>{model}</span>
@@ -418,11 +418,11 @@ const TrainingPage = () => (
     <Block label="notebooks/colab_train.py — run cell by cell">{`# Cell 1 — mount Drive
 from google.colab import drive
 drive.mount('/content/drive')
-SAVE = "/content/drive/MyDrive/sheep"
+SAVE = "/content/drive/MyDrive/ohhsloth"
 
 # Cell 2 — clone your repo
-!git clone https://github.com/yourname/sheep /content/sheep
-%cd /content/sheep
+!git clone https://github.com/yourname/ohhsloth /content/ohhsloth
+%cd /content/ohhsloth
 
 # Cell 3 — install deps
 !pip install -q -r requirements.txt
@@ -434,20 +434,20 @@ SAVE = "/content/drive/MyDrive/sheep"
 !python tokenizer/train_tokenizer.py --data {SAVE}/data/cleaned/train.jsonl
 
 # Cell 6 — TRAIN!
-!python training/train.py --config configs/sheep_tiny.yaml`}</Block>
+!python training/train.py --config configs/ohhsloth_tiny.yaml`}</Block>
 
     <H2>Resume interrupted training</H2>
     <P>Colab sessions die after ~12 hours. Checkpoints save to Drive automatically. Resume with:</P>
     <Block label="terminal">{`python training/train.py \\
-  --config configs/sheep_120m.yaml \\
-  --resume /content/drive/MyDrive/sheep/checkpoints/sheep-step-5000.pt`}</Block>
+  --config configs/ohhsloth_120m.yaml \\
+  --resume /content/drive/MyDrive/ohhsloth/checkpoints/ohhsloth-step-5000.pt`}</Block>
 
     <H2>Reading the training logs</H2>
     <Block>{`step   100 | loss 3.84 | lr 3.00e-04 | 1240 tok/s
 step   500 | loss 2.93 | lr 2.88e-04 | 1198 tok/s
 step  1000 | loss 2.41 | lr 2.61e-04 | 1205 tok/s
 VAL LOSS: 2.39  ← saved best checkpoint → HuggingFace`}</Block>
-    <P>Loss going down = Sheep is learning. Val loss below 2.0 = genuinely useful generations.</P>
+    <P>Loss going down = OhhSloth is learning. Val loss below 2.0 = genuinely useful generations.</P>
   </div>
 );
 
@@ -476,7 +476,7 @@ data/v4/  ← + instruction pairs (chat format)`}</Block>
 # → data/cleaned/train_v2.jsonl`} />
     <Step num="03" title="Update your config"
       body="Point the training config to the new data version. No code changes needed."
-      codeLabel="configs/sheep_120m.yaml"
+      codeLabel="configs/ohhsloth_120m.yaml"
       code={`data:
   train_file: data/tokenized/train_v2.bin  # ← change version
   val_file:   data/tokenized/val_v2.bin`} />
@@ -484,18 +484,18 @@ data/v4/  ← + instruction pairs (chat format)`}</Block>
       body="For small new datasets, fine-tune from the existing checkpoint. Much faster than retraining from scratch."
       codeLabel="Colab"
       code={`python training/train.py \\
-  --config configs/sheep_120m.yaml \\
-  --resume checkpoints/sheep-120m-v1/sheep-best.pt`} />
+  --config configs/ohhsloth_120m.yaml \\
+  --resume checkpoints/ohhsloth-120m-v1/ohhsloth-best.pt`} />
     <Step num="05" title="Publish new version"
       body="Push the new model to HuggingFace with a versioned name. Never delete old versions — always keep the ability to roll back."
       codeLabel="Colab"
       code={`# new model gets a new HF repo name
-repo_id = "yourname/sheep-120m-v2"
-api.upload_file(path_or_fileobj="sheep-best.pt", repo_id=repo_id)`} />
+repo_id = "yourname/ohhsloth-120m-v2"
+api.upload_file(path_or_fileobj="ohhsloth-best.pt", repo_id=repo_id)`} />
 
     <H2>Model version naming</H2>
     <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12.5, lineHeight: 2 }}>
-      {["sheep-120m-v1", "sheep-120m-v2", "sheep-120m-v1-instruct", "sheep-120m-v2-instruct", "sheep-1b-v1"].map(n => (
+      {["ohhsloth-120m-v1", "ohhsloth-120m-v2", "ohhsloth-120m-v1-instruct", "ohhsloth-120m-v2-instruct", "ohhsloth-1b-v1"].map(n => (
         <div key={n} style={{ padding: "4px 0", borderBottom: "1px solid #f4f4f4", color: "#444" }}>yourname/{n}</div>
       ))}
     </div>
@@ -506,7 +506,7 @@ const SetupPage = () => (
   <div>
     <H1>Local Setup</H1>
     <p style={{ fontSize: 15, color: "#999", marginBottom: 32, fontFamily: "'DM Sans', sans-serif" }}>
-      Get Sheep running on your machine in 5 minutes.
+      Get OhhSloth running on your machine in 5 minutes.
     </p>
 
     <H2>Prerequisites</H2>
@@ -526,65 +526,65 @@ const SetupPage = () => (
 
     <H2>Install</H2>
     <Block label="terminal">{`# 1. Clone
-git clone https://github.com/yourname/sheep
-cd sheep
+git clone https://github.com/yourname/ohhsloth
+cd ohhsloth
 
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Install sheep CLI
+# 3. Install ohhsloth CLI
 pip install -e .
 
 # 4. Verify model works (no GPU needed)
-python model/sheep_model.py
+python model/ohhsloth_model.py
 # → Model is working correctly!
 
 # 5. Verify CLI
-sheep info`}</Block>
+ohhsloth info`}</Block>
 
     <H2>First day workflow</H2>
     <Block label="VS Code">{`# write / edit code
 code .
 
 # test model architecture
-python model/sheep_model.py
+python model/ohhsloth_model.py
 
 # push to GitHub
 git add . && git commit -m "init" && git push`}</Block>
     <Block label="Google Colab">{`# at start of every session
 from google.colab import drive
 drive.mount('/content/drive')
-!git clone https://github.com/yourname/sheep  # first time
-!cd sheep && git pull                          # every time after
+!git clone https://github.com/yourname/ohhsloth  # first time
+!cd ohhsloth && git pull                          # every time after
 
 # run training
-!python training/train.py --config configs/sheep_tiny.yaml`}</Block>
-    <Block label="After training — run Sheep locally">{`sheep pull yourname/sheep-120m
-sheep serve &
-sheep run sheep-120m`}</Block>
+!python training/train.py --config configs/ohhsloth_tiny.yaml`}</Block>
+    <Block label="After training — run OhhSloth locally">{`ohhsloth pull yourname/ohhsloth-120m
+ohhsloth serve &
+ohhsloth run ohhsloth-120m`}</Block>
 
     <H2>Environment variables</H2>
     <Block label=".env">{`HF_TOKEN=hf_your_huggingface_token
 WANDB_API_KEY=your_wandb_key
-SHEEP_MODELS_DIR=~/.sheep/models`}</Block>
+OHHSLOTH_MODELS_DIR=~/.ohhsloth/models`}</Block>
   </div>
 );
 
 const PAGES = {
-  overview:     OverviewPage,
+  overview:       OverviewPage,
   "how-it-works": HowItWorksPage,
-  architecture: ArchitecturePage,
-  "tech-stack": TechStackPage,
-  api:          ApiPage,
-  cli:          CliPage,
-  training:     TrainingPage,
-  versioning:   VersioningPage,
-  setup:        SetupPage,
+  architecture:   ArchitecturePage,
+  "tech-stack":   TechStackPage,
+  api:            ApiPage,
+  cli:            CliPage,
+  training:       TrainingPage,
+  versioning:     VersioningPage,
+  setup:          SetupPage,
 };
 
 /* ── shell ──────────────────────────────────────────── */
 
-export default function SheepDocs() {
+export default function Docs() {
   const [current, setCurrent] = useState("overview");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -613,8 +613,8 @@ export default function SheepDocs() {
       <header style={{ position: "sticky", top: 0, zIndex: 40, background: scrolled ? "rgba(255,255,255,0.92)" : "#fff", backdropFilter: scrolled ? "blur(12px)" : "none", borderBottom: "1px solid #ebebeb", transition: "background 0.2s" }}>
         <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 24px", height: 54, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 24 }}>🐑</span>
-            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: "#0d0d0d", letterSpacing: "-0.02em" }}>Sheep</span>
+            <span style={{ fontSize: 24 }}>🦥</span>
+            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: "#0d0d0d", letterSpacing: "-0.02em" }}>OhhSloth</span>
             <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#bbb", letterSpacing: "0.08em", marginTop: 2 }}>docs</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
