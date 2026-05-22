@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import React from "react";
 
 const NAV = [
@@ -14,6 +14,226 @@ const NAV = [
 ];
 
 type NavId = "overview" | "how-it-works" | "architecture" | "tech-stack" | "api" | "cli" | "training" | "versioning" | "setup";
+
+/* ── syntax highlighter ─────────────────────────────── */
+
+type TokenType = "keyword" | "string" | "comment" | "number" | "operator" | "tag" | "attr" | "value" | "flag" | "plain" | "path" | "builtin";
+
+interface Token { type: TokenType; text: string }
+
+function tokenizeLine(line: string, lang: string): Token[] {
+  if (lang === "html" || lang === "HTML") return tokenizeHtml(line);
+  if (lang === "yaml" || lang === "YAML") return tokenizeYaml(line);
+  return tokenizeShell(line);
+}
+
+function tokenizeHtml(line: string): Token[] {
+  const tokens: Token[] = [];
+  let rest = line;
+  while (rest.length > 0) {
+    // comment
+    const cm = rest.match(/^(<!--.*?-->|<!--[\s\S]*)/);
+    if (cm) { tokens.push({ type: "comment", text: cm[1] }); rest = rest.slice(cm[1].length); continue; }
+    // opening/closing tag name
+    const tm = rest.match(/^(<\/?)([a-zA-Z][a-zA-Z0-9-]*)/);
+    if (tm) { tokens.push({ type: "operator", text: tm[1] }, { type: "tag", text: tm[2] }); rest = rest.slice(tm[0].length); continue; }
+    // closing >
+    const gm = rest.match(/^(\/?>)/);
+    if (gm) { tokens.push({ type: "operator", text: gm[1] }); rest = rest.slice(gm[1].length); continue; }
+    // attribute="value"
+    const av = rest.match(/^([a-zA-Z:_-][\w:.-]*)(\s*=\s*)("[^"]*"|'[^']*')/);
+    if (av) { tokens.push({ type: "attr", text: av[1] }, { type: "plain", text: av[2] }, { type: "value", text: av[3] }); rest = rest.slice(av[0].length); continue; }
+    // bare attribute
+    const ba = rest.match(/^([a-zA-Z:_-][\w:.-]*)/);
+    if (ba) { tokens.push({ type: "attr", text: ba[1] }); rest = rest.slice(ba[1].length); continue; }
+    tokens.push({ type: "plain", text: rest[0] }); rest = rest.slice(1);
+  }
+  return tokens;
+}
+
+function tokenizeYaml(line: string): Token[] {
+  const tokens: Token[] = [];
+  const cm = line.match(/^(\s*)(#.*)$/);
+  if (cm) { if (cm[1]) tokens.push({ type: "plain", text: cm[1] }); tokens.push({ type: "comment", text: cm[2] }); return tokens; }
+  const kvm = line.match(/^(\s*)([^:]+?)(\s*:\s*)(.*)$/);
+  if (kvm) {
+    if (kvm[1]) tokens.push({ type: "plain", text: kvm[1] });
+    tokens.push({ type: "attr", text: kvm[2] });
+    tokens.push({ type: "plain", text: kvm[3] });
+    const val = kvm[4];
+    if (val.startsWith('"') || val.startsWith("'")) tokens.push({ type: "string", text: val });
+    else if (/^(true|false|null)$/.test(val)) tokens.push({ type: "keyword", text: val });
+    else if (/^\d/.test(val)) tokens.push({ type: "number", text: val });
+    else tokens.push({ type: "value", text: val });
+    return tokens;
+  }
+  return [{ type: "plain", text: line }];
+}
+
+function tokenizeShell(line: string): Token[] {
+  const tokens: Token[] = [];
+  let rest = line;
+
+  // comment
+  if (/^\s*#/.test(rest)) {
+    const indent = rest.match(/^(\s*)/)?.[1] ?? "";
+    tokens.push({ type: "plain", text: indent });
+    tokens.push({ type: "comment", text: rest.slice(indent.length) });
+    return tokens;
+  }
+
+  // prompt symbol
+  const prompt = rest.match(/^([$>]\s+)/);
+  if (prompt) { tokens.push({ type: "operator", text: prompt[1] }); rest = rest.slice(prompt[1].length); }
+
+  while (rest.length > 0) {
+    // string
+    const str = rest.match(/^("(?:[^"\\]|\\.)*"|'[^']*')/);
+    if (str) { tokens.push({ type: "string", text: str[1] }); rest = rest.slice(str[1].length); continue; }
+    // flags like --output, -q
+    const flag = rest.match(/^(--?[a-zA-Z][\w-]*)/);
+    if (flag) { tokens.push({ type: "flag", text: flag[1] }); rest = rest.slice(flag[1].length); continue; }
+    // numbers
+    const num = rest.match(/^(\d[\d.]*)/);
+    if (num) { tokens.push({ type: "number", text: num[1] }); rest = rest.slice(num[1].length); continue; }
+    // keywords / builtins at word start
+    const kw = rest.match(/^(python|pip|git|cd|source|export|echo|cat|mkdir|cp|mv|rm|curl|wget|ohhsloth|!python|!pip|!git|!cd)\b/);
+    if (kw) { tokens.push({ type: "keyword", text: kw[1] }); rest = rest.slice(kw[1].length); continue; }
+    // path-like tokens
+    const path = rest.match(/^([./~][\w./~-]+)/);
+    if (path) { tokens.push({ type: "path", text: path[1] }); rest = rest.slice(path[1].length); continue; }
+    // operators
+    const op = rest.match(/^([|&\\=<>])/);
+    if (op) { tokens.push({ type: "operator", text: op[1] }); rest = rest.slice(1); continue; }
+    // everything else word
+    const word = rest.match(/^(\S+)/);
+    if (word) { tokens.push({ type: "plain", text: word[1] }); rest = rest.slice(word[1].length); continue; }
+    tokens.push({ type: "plain", text: rest[0] }); rest = rest.slice(1);
+  }
+  return tokens;
+}
+
+const TOKEN_COLORS: Record<TokenType, string> = {
+  keyword:  "#ff79c6",   // pink  — commands, python, pip
+  string:   "#f1fa8c",   // yellow — strings
+  comment:  "#6272a4",   // muted blue-grey
+  number:   "#bd93f9",   // purple
+  operator: "#ff79c6",   // pink — < > = |
+  tag:      "#ff79c6",   // pink — html tags
+  attr:     "#50fa7b",   // green — attribute names / yaml keys
+  value:    "#8be9fd",   // cyan — attribute values / yaml values
+  flag:     "#8be9fd",   // cyan — --flags
+  plain:    "#f8f8f2",   // white
+  path:     "#f1fa8c",   // yellow — file paths
+  builtin:  "#50fa7b",   // green
+};
+
+function detectLang(label?: string): string {
+  if (!label) return "shell";
+  const l = label.toLowerCase();
+  if (l.includes(".html") || l === "html") return "html";
+  if (l.includes(".yaml") || l.includes(".yml") || l.includes("yaml")) return "yaml";
+  if (l.includes(".py") || l.includes("python")) return "python";
+  return "shell";
+}
+
+function getLangDisplay(label?: string): string {
+  const lang = detectLang(label);
+  if (lang === "html") return "HTML";
+  if (lang === "yaml") return "YAML";
+  if (label?.includes(".py")) return "PYTHON";
+  return "SHELL";
+}
+
+/* ── Block component (VS Code style) ───────────────── */
+
+const Block = ({ children, label }: { children: React.ReactNode; label?: string }) => {
+  const [copied, setCopied] = useState(false);
+  const code = String(children).replace(/\n$/, "");
+  const lines = code.split("\n");
+  const lang = detectLang(label);
+  const langDisplay = getLangDisplay(label);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [code]);
+
+  return (
+    <div style={{ margin: "16px 0", borderRadius: 10, overflow: "hidden", border: "1px solid #313244", background: "#1e1e2e", fontFamily: "'DM Mono', monospace" }}>
+      {/* header bar */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 14px", background: "#181825", borderBottom: "1px solid #313244" }}>
+        <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "#6272a4", textTransform: "uppercase", fontWeight: 500 }}>
+          {label || langDisplay}
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 10, letterSpacing: "0.12em", color: "#6272a4", textTransform: "uppercase" }}>{langDisplay}</span>
+          <button
+            onClick={handleCopy}
+            title="Copy"
+            style={{
+              background: copied ? "#313244" : "transparent",
+              border: "1px solid #313244",
+              borderRadius: 5,
+              padding: "3px 8px",
+              cursor: "pointer",
+              color: copied ? "#50fa7b" : "#6272a4",
+              fontSize: 10,
+              fontFamily: "'DM Mono', monospace",
+              letterSpacing: "0.05em",
+              transition: "all .15s",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            {copied ? (
+              <>
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#50fa7b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Copied
+              </>
+            ) : (
+              <>
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                  <rect x="4" y="1" width="7" height="8" rx="1.5" stroke="#6272a4" strokeWidth="1.2"/>
+                  <rect x="1" y="3" width="7" height="8" rx="1.5" stroke="#6272a4" strokeWidth="1.2" fill="#181825"/>
+                </svg>
+                Copy
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* code lines */}
+      <div style={{ overflowX: "auto", padding: "14px 0 14px 0" }}>
+        <table style={{ borderCollapse: "collapse", width: "100%", tableLayout: "fixed" }}>
+          <tbody>
+            {lines.map((line, i) => {
+              const tokens = tokenizeLine(line, lang);
+              return (
+                <tr key={i} style={{ lineHeight: 1.75 }}>
+                  {/* line number */}
+                  <td style={{ width: 42, textAlign: "right", paddingRight: 16, paddingLeft: 14, userSelect: "none", color: "#44475a", fontSize: 12, verticalAlign: "top", fontVariantNumeric: "tabular-nums" }}>
+                    {i + 1}
+                  </td>
+                  {/* code */}
+                  <td style={{ paddingRight: 20, fontSize: 12.5, whiteSpace: "pre", verticalAlign: "top" }}>
+                    {tokens.map((tok, j) => (
+                      <span key={j} style={{ color: TOKEN_COLORS[tok.type] }}>{tok.text}</span>
+                    ))}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
 /* ── primitives ─────────────────────────────────────── */
 
@@ -35,15 +255,6 @@ const P = ({ children }: { children: React.ReactNode }) => (
 
 const Code = ({ children }: { children: React.ReactNode }) => (
   <code style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, background: "#f4f4f2", padding: "2px 6px", borderRadius: 4, color: "#333" }}>{children}</code>
-);
-
-const Block = ({ children, label }: { children: React.ReactNode; label?: string }) => (
-  <div style={{ margin: "16px 0" }}>
-    {label && <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.1em", color: "#bbb", textTransform: "uppercase", marginBottom: 6 }}>{label}</div>}
-    <pre style={{ background: "#0d0d0d", color: "#e8e4d9", fontFamily: "'DM Mono', monospace", fontSize: 12.5, lineHeight: 1.7, borderRadius: 10, padding: "18px 22px", overflowX: "auto", whiteSpace: "pre-wrap", margin: 0 }}>
-      {children}
-    </pre>
-  </div>
 );
 
 const Tag = ({ color = "#f4f4f2", text = "#666", children }: { color?: string; text?: string; children: React.ReactNode }) => (
@@ -79,7 +290,7 @@ const Step = ({ num, title, body, code, codeLabel }: { num: string; title: strin
 
 const OverviewPage = () => (
   <div>
-    <H1>OhhSloth 🦥</H1>
+    <H1>OhhSloth</H1>
     <p style={{ fontSize: 15, color: "#999", marginBottom: 32, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
       Your own large language model — built from scratch, trained on your data, runs on your machine.
     </p>
@@ -465,16 +676,16 @@ const VersioningPage = () => (
     </p>
 
     <H2>Dataset versioning strategy</H2>
-    <Block label="version naming">{`data/v1/  ← Wikipedia only (baseline)
-data/v2/  ← + your custom text files
-data/v3/  ← + code data + better cleaning
-data/v4/  ← + instruction pairs (chat format)`}</Block>
+    <Block label="version naming">{`data/v1/  # Wikipedia only (baseline)
+data/v2/  # + your custom text files
+data/v3/  # + code data + better cleaning
+data/v4/  # + instruction pairs (chat format)`}</Block>
 
     <H2>Adding new data — exact steps</H2>
     <Step num="01" title="Add your text file"
       body="Put any .txt or .jsonl file in data/raw/. Can be your own notes, articles, domain-specific content — anything."
       codeLabel="folder"
-      code={`data/raw/my_domain_notes.txt   ← your new file`} />
+      code={`data/raw/my_domain_notes.txt   # your new file`} />
     <Step num="02" title="Run the pipeline"
       body="Cleans, deduplicates, and merges with existing data. Creates a new versioned output."
       codeLabel="Colab"
@@ -485,7 +696,7 @@ data/v4/  ← + instruction pairs (chat format)`}</Block>
       body="Point the training config to the new data version. No code changes needed."
       codeLabel="configs/ohhsloth_120m.yaml"
       code={`data:
-  train_file: data/tokenized/train_v2.bin  # ← change version
+  train_file: data/tokenized/train_v2.bin
   val_file:   data/tokenized/val_v2.bin`} />
     <Step num="04" title="Fine-tune (don't retrain)"
       body="For small new datasets, fine-tune from the existing checkpoint. Much faster than retraining from scratch."
@@ -620,12 +831,11 @@ export default function Docs() {
       <header style={{ position: "sticky", top: 0, zIndex: 40, background: scrolled ? "rgba(255,255,255,0.92)" : "#fff", backdropFilter: scrolled ? "blur(12px)" : "none", borderBottom: "1px solid #ebebeb", transition: "background 0.2s" }}>
         <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 24px", height: 54, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 24 }}>🦥</span>
-            <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: "#0d0d0d", letterSpacing: "-0.02em" }}>OhhSloth</span>
+            <img src="/logo/ohhsloth.png" className="w-7"/>
+            <span className="font-serif text-md cool text-gray-800 tracking-tight">OhhSloth</span>
             <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#bbb", letterSpacing: "0.08em", marginTop: 2 }}>docs</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#bbb" }}>v1.0.0</span>
             <button onClick={() => setMenuOpen(v => !v)} style={{ background: "none", border: "none", cursor: "pointer", color: "#888", padding: 4, display: window.innerWidth >= 768 ? "none" : "block" }} aria-label="menu">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 {menuOpen
