@@ -165,9 +165,9 @@ const Block = ({ children, label }: { children: React.ReactNode; label?: string 
     <div style={{ margin: "16px 0", borderRadius: 10, overflow: "hidden", border: "1px solid #313244", background: "#1e1e2e", fontFamily: "'DM Mono', monospace" }}>
       {/* header bar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 14px", background: "#181825", borderBottom: "1px solid #313244" }}>
-        <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "#6272a4", textTransform: "uppercase", fontWeight: 500 }}>
+       <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "#6272a4", fontWeight: 500 }}>
           {label || langDisplay}
-        </span>
+        </span> 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 10, letterSpacing: "0.12em", color: "#6272a4", textTransform: "uppercase" }}>{langDisplay}</span>
           <button
@@ -292,10 +292,10 @@ const OverviewPage = () => (
   <div>
     <H1>OhhSloth</H1>
     <p style={{ fontSize: 15, color: "#999", marginBottom: 32, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6 }}>
-      Your own large language model — built from scratch, trained on your data, runs on your machine.
+      Your own large language model built from scratch, trained on your data, runs on your machine.
     </p>
     <P>
-      OhhSloth is a fully custom LLM stack. From raw text data to a running model you can chat with — every single layer is built by you. No black boxes. No API bills. Just your own AI with your own name.
+      OhhSloth is a fully custom LLM stack. From raw text data to a running model you can chat with every single layer is built by you. No black boxes. No API bills. Just your own AI with your own name.
     </P>
     <P>
       Inspired by Ollama, OhhSloth lets you run your trained model locally with one command: <Code>ohhsloth run ohhsloth-120m</Code>. The difference is every part of the stack is yours.
